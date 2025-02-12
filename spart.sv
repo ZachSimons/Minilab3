@@ -2,7 +2,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date:   
+// Create Date:    
 // Design Name: 
 // Module Name:    spart 
 // Project Name: 
@@ -22,12 +22,12 @@ module spart(
     input rst,
     input iocs,
     input iorw,
-    output rda,
-    output tbr,
+    output logic rda,
+    output logic tbr,
     input [1:0] ioaddr,
     inout [7:0] databus,
-    output txd,
-    input rxd
+    output logic txd,
+    input logic rxd
     );
 
     localparam RESET = 3'b000;
@@ -40,12 +40,12 @@ module spart(
     logic [2:0] transmit_counter, receive_counter;
     logic [8:0] transmit_data, receive_data;
     logic [7:0] r_data, status;
-    logic capture, transmit_enable, receive_enable, sample_enable, proc_rec;
+    logic capture, transmit_enable, receive_enable, sample_enable, proc_rec, baud_enable;
     logic [15:0] divisor, baud_counter;
 
 
 
-    assign databus = proc_rec ? r_data : databus;
+    assign databus = proc_rec ? r_data : 8'bz;
 
 
     ///////// baud rate gen ////////////
@@ -77,7 +77,7 @@ module spart(
             transmit_data <= {databus, 1'b0};
         end
         else if(baud_enable && transmit_enable) begin
-            txd <= transmit_data[0]
+            txd <= transmit_data[0];
             transmit_data <= {1'b1, transmit_data[8:1]};
             transmit_counter <= transmit_counter + 1;
         end
@@ -106,7 +106,6 @@ module spart(
         end
     end
 
-
     ///////// State Machine //////
 
     always @ (posedge clk)
@@ -117,7 +116,6 @@ module spart(
 
     always @(*) begin
 	    nxt_state = state;
-        divisor = '0;
         transmit_enable = 1'b0;
         nxt_state = IDLE;
         proc_rec = 1'b0;
