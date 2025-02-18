@@ -65,7 +65,7 @@ initial begin
     rst = 1;
     #10;
 
-    @(posedge clk)
+    @(posedge clk);
     iocs = 1;
 
     //Init Spart 0 and Spart 1
