@@ -36,7 +36,8 @@ module spart(
     localparam RECEIVE = 3'b011;
     logic [2:0] state, nxt_state;
     logic [3:0] transmit_counter, receive_counter;
-    logic [8:0] transmit_data, receive_data;
+    logic [8:0] transmit_data;
+    logic [9:0] receive_data;
     logic [7:0] r_data, status;
     logic capture, transmit_enable, receive_enable, sample_enable, 
         proc_rec, baud_enable, new_divisor, read_status;

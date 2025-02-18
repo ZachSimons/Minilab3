@@ -49,10 +49,10 @@ module driver(
     //assign databus = config_data_low;
     
     // CONFIG           Baud Rate       Divisor (HEX) SYS_Clock / Baud Rate
-    // br_cfg = 00      4800            0x1458
-    // br_cfg = 01      9600            0x0A2C
-    // br_cfg  = 10     19200           0x0516
-    // br_cfg = 11      38400           0x028b
+    // br_cfg = 00      4800            0x1457
+    // br_cfg = 01      9600            0x0A2B
+    // br_cfg  = 10     19200           0x0515
+    // br_cfg = 11      38400           0x028A
 
     //State Machine
     always @ (posedge clk or negedge rst) begin
@@ -92,16 +92,16 @@ module driver(
                     db_select_low = 1'b1;
                     ioaddr = 2'b10;
                     if(br_cfg == 2'b00) begin
-                        config_data_low = 8'h58;
+                        config_data_low = 8'h57;
                     end
                     else if(br_cfg == 2'b01) begin
-                        config_data_low = 8'h2C;
+                        config_data_low = 8'h2B;
                     end
                     else if(br_cfg == 2'b10) begin
-                        config_data_low = 8'h16;
+                        config_data_low = 8'h15;
                     end
                     else if(br_cfg == 2'b11) begin
-                        config_data_low = 8'h8b;
+                        config_data_low = 8'h8a;
                     end
                     iorw = 1'b0;
                     next_state = RESET;
