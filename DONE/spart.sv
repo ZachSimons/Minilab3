@@ -168,22 +168,21 @@ module spart(
         read_status = 1'b0;
 	    case(state)
 	    	RESET : begin
-	    		divisor = '0;
                 transmit_enable = 1'b0;
                 nxt_state = IDLE;
                 proc_rec = 1'b0;
                 tbr = 1'b1;
-                if(~iorw && iocs && (ioaddr==2'b11 || ioaddr==2'b10)) begin
-                    if(ioaddr == 2'b11) begin
-                        divisor = {databus,divisor[7:0]};
-                        new_divisor = 1;
-                    end
-                    else begin
-                        divisor = {divisor[15:8],databus};
-                        new_divisor = 1;
-                    end
-                end
-	    	end
+					if(~iorw && iocs && (ioaddr==2'b11 || ioaddr==2'b10)) begin
+								  if(ioaddr == 2'b11) begin
+										divisor = {databus,divisor[7:0]};
+										new_divisor = 1;
+								  end
+								  else begin
+										divisor = {divisor[15:8],databus};
+										new_divisor = 1;
+								  end
+							 end
+					end
             IDLE : begin
                 if(~iorw && iocs && ioaddr==2'b00) begin
                     capture = 1'b1;

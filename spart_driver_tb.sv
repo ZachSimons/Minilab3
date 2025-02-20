@@ -100,7 +100,7 @@ initial begin
     iocs = 1;
     ioaddr0 = 2'b10;
     iorw0 = 0;
-    databus_logic0 = 8'h57;
+    databus_logic0 = 8'h58;
     db_select0 = 1;
     @(posedge clk);
     ioaddr0 = 2'b11;
@@ -111,7 +111,7 @@ initial begin
 
     iorw0 = 1;
 
-
+    #1000000;
     //Write to spart0
 
     @(posedge clk);
@@ -125,10 +125,46 @@ initial begin
     db_select0 = 0;
     @(posedge rda0);
 
-    @(posedge tbr1);
+
+    #1009999;
+
+    rst = 0;
+    br_cfg = 2'b11;
+    db_select1 = 0;
+    db_select0 = 0;
+
+    // Apply reset
+    #10;
+    rst = 1;
+    #10;
+
+    //Init spart0
+    iocs = 1;
+    ioaddr0 = 2'b10;
+    iorw0 = 0;
+    databus_logic0 = 8'h16;
+    db_select0 = 1;
+    @(posedge clk);
+    ioaddr0 = 2'b11;
+    iorw0 = 0;
+    databus_logic0 = 8'h05;
+    db_select0 = 1;
+    @(posedge clk);
 
 
-    #150;
+    @(posedge clk);
+    ioaddr0 = 2'b00;
+    iorw0 = 0;
+    databus_logic0 = 8'h24;
+    db_select0 = 1;
+    @(posedge clk);
+
+    iorw0 = 1;
+    db_select0 = 0;
+
+
+    #1009999;
+
     $stop;
   end
 
