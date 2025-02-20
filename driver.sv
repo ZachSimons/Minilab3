@@ -44,15 +44,11 @@ module driver(
                         (db_select_high ? config_data_high :
                         (transmit_select ? recieved_data : 8'bz));
     
-    //assign databus = (db_select_low) ? config_data_low : 8'bz;
-
-    //assign databus = config_data_low;
-    
     // CONFIG           Baud Rate       Divisor (HEX) SYS_Clock / Baud Rate
-    // br_cfg = 00      4800            0x1457
-    // br_cfg = 01      9600            0x0A2B
-    // br_cfg  = 10     19200           0x0515
-    // br_cfg = 11      38400           0x028A
+    // br_cfg = 00      4800            0x28B1
+    // br_cfg = 01      9600            0x1458
+    // br_cfg  = 10     19200           0x0A2C
+    // br_cfg = 11      38400           0x0516
 
     //State Machine
     always @ (posedge clk or negedge rst) begin
@@ -77,7 +73,7 @@ module driver(
         end
     end
 
-    always_comb begin
+    always @(*) begin
         next_state = IDLE;
         iocs = 1'b1;
         iorw = 1'b1;
@@ -92,16 +88,16 @@ module driver(
                     db_select_low = 1'b1;
                     ioaddr = 2'b10;
                     if(br_cfg == 2'b00) begin
-                        config_data_low = 8'h57;
+                        config_data_low = 8'hB1;
                     end
                     else if(br_cfg == 2'b01) begin
-                        config_data_low = 8'h2B;
+                        config_data_low = 8'h587;
                     end
                     else if(br_cfg == 2'b10) begin
-                        config_data_low = 8'h15;
+                        config_data_low = 8'h2C;
                     end
                     else if(br_cfg == 2'b11) begin
-                        config_data_low = 8'h8a;
+                        config_data_low = 8'h16;
                     end
                     iorw = 1'b0;
                     next_state = RESET;
@@ -110,27 +106,29 @@ module driver(
                     ioaddr = 2'b11;
                     db_select_high = 1'b1;
                     if(br_cfg == 2'b00) begin
-                        config_data_high = 8'h14;
+                        config_data_high = 8'h28;
                     end
                     else if(br_cfg == 2'b01) begin
-                        config_data_high = 8'h0A;
+                        config_data_high = 8'h14;
                     end
                     else if(br_cfg == 2'b10) begin
-                        config_data_high = 8'h05;
+                        config_data_high = 8'h0A;
                     end
                     else if(br_cfg == 2'b11) begin
-                        config_data_high = 8'h02;
+                        config_data_high = 8'h05;
                     end
                     iorw = 1'b0;
                     next_state = IDLE;
                 end
             end
             IDLE : begin
+                /*
+                if(data_ready) begin
+                    next_state = TRANSMIT;
+                end
+                */
                 if(rda) begin
                     next_state = RECEIVE;
-                end
-                if(tbr && data_ready) begin
-                    next_state = TRANSMIT;
                 end
             end
             TRANSMIT : begin
@@ -145,7 +143,7 @@ module driver(
                 ioaddr = 2'b00;
                 recieved_data = databus;
                 data_ready = 1'b1;
-                next_state = IDLE;
+                next_state = TRANSMIT;
             end
         endcase
     end

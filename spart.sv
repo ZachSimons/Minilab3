@@ -40,7 +40,7 @@ module spart(
     logic [9:0] receive_data;
     logic [7:0] r_data, status;
     logic capture, transmit_enable, receive_enable, sample_enable, 
-        proc_rec, baud_enable, new_divisor, read_status;
+        proc_rec, baud_enable_rec, baud_enable_tr, new_divisor, read_status;
     logic [15:0] divisor, baud_counter;
 
 
@@ -53,18 +53,24 @@ module spart(
     always_ff @(posedge clk, negedge rst) begin
         if(~rst) begin
             baud_counter <= divisor;
-            baud_enable <= 1'b0;
+            baud_enable_rec <= 1'b0;
+            baud_enable_tr <= 1'b0;
         end
-        else if(baud_counter == 0) begin
+        else if(baud_counter == (divisor / 2)) begin
+            baud_counter <= baud_counter - 1;
+            baud_enable_rec <= 1'b1;
+        end
+        else if (baud_counter == 0) begin
+            baud_enable_tr <= 1'b1;
             baud_counter <= divisor;
-            baud_enable <= 1'b1;
         end
         else if(new_divisor) begin
             baud_counter <= divisor;
         end
         else begin //maybe enable
             baud_counter <= baud_counter - 1;
-            baud_enable <= 0;
+            baud_enable_rec <= 0;
+            baud_enable_tr <= 0;
         end
     end
 
@@ -80,7 +86,7 @@ module spart(
             transmit_counter <= '0;
             transmit_data <= {databus, 1'b0};
         end
-        else if((baud_enable && transmit_enable) | transmit_counter == 0) begin
+        else if((baud_enable_tr && transmit_enable) | transmit_counter == 0) begin
             txd <= transmit_data[0];
             transmit_data <= {1'b1, transmit_data[8:1]};
             transmit_counter <= transmit_counter + 1;
@@ -105,12 +111,17 @@ module spart(
             receive_data <= '0;
             receive_counter <= '0;
         end
-        else if(baud_enable && sample_enable) begin
+        else if(receive_counter == 10 && baud_enable_rec) begin
+            receive_counter <= receive_counter + 1;
+        end
+        else if(receive_counter == 11 && baud_enable_tr) begin
+            rda <= 1'b1;
+            sample_enable <= 1'b0;
+        end
+        else if(receive_counter == 9) begin
             receive_data <= {receive_data[7:0], rxd};
             receive_counter <= receive_counter + 1;
             if(receive_counter == 9) begin
-                sample_enable <= '0;
-                rda <= 1'b1;
                 //We want to flip data back to MSB bit first
                 r_data[7] <= receive_data[0];
                 r_data[6] <= receive_data[1];
@@ -121,6 +132,10 @@ module spart(
                 r_data[1] <= receive_data[6];
                 r_data[0] <= receive_data[7];
             end
+        end
+        else if(baud_enable_rec && sample_enable) begin
+            receive_data <= {receive_data[7:0], rxd};
+            receive_counter <= receive_counter + 1;
         end
         else if (proc_rec) begin
             rda <= 1'b0;

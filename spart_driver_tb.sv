@@ -100,12 +100,12 @@ initial begin
     iocs = 1;
     ioaddr0 = 2'b10;
     iorw0 = 0;
-    databus_logic0 = 8'h2C;
+    databus_logic0 = 8'h57;
     db_select0 = 1;
     @(posedge clk);
     ioaddr0 = 2'b11;
     iorw0 = 0;
-    databus_logic0 = 8'h0A;
+    databus_logic0 = 8'h14;
     db_select0 = 1;
     @(posedge clk);
 
@@ -124,6 +124,8 @@ initial begin
     iorw0 = 1;
     db_select0 = 0;
     @(posedge rda0);
+
+    @(posedge tbr1);
 
 
     #150;
